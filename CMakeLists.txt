@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.22)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "")
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
+project(Taktwerk VERSION 1.0.0 LANGUAGES C CXX)
+set(CMAKE_CXX_STANDARD 20)
+include(FetchContent)
+FetchContent_Declare(JUCE GIT_REPOSITORY https://github.com/juce-framework/JUCE.git GIT_TAG 9.0.5 GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(JUCE)
+set(SRC Source/PluginProcessor.cpp Source/PluginEditor.cpp)
+juce_add_plugin(Taktwerk COMPANY_NAME "Taktwerk" PLUGIN_MANUFACTURER_CODE Tkwk PLUGIN_CODE Tkw1
+    FORMATS VST3 PRODUCT_NAME "Taktwerk" IS_SYNTH TRUE NEEDS_MIDI_INPUT TRUE NEEDS_MIDI_OUTPUT TRUE
+    VST3_CATEGORIES Instrument COPY_PLUGIN_AFTER_BUILD FALSE)
+target_sources(Taktwerk PRIVATE ${SRC})
+set(DEFS JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_DISPLAY_SPLASH_SCREEN=0
+    TAKTWERK_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(Taktwerk PUBLIC ${DEFS})
+target_link_libraries(Taktwerk PRIVATE juce::juce_audio_utils PUBLIC juce::juce_recommended_config_flags)
+juce_add_console_app(TaktwerkTest PRODUCT_NAME "TaktwerkTest")
+target_sources(TaktwerkTest PRIVATE ${SRC} Test/Main.cpp)
+target_compile_definitions(TaktwerkTest PRIVATE ${DEFS})
+target_link_libraries(TaktwerkTest PRIVATE juce::juce_audio_utils PUBLIC juce::juce_recommended_config_flags)
